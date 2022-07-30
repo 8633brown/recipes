@@ -12,6 +12,7 @@ services:
     restart: always
     build:
       context: .
+      target: tandoor_python
     env_file:
       - ./.env
     volumes:
@@ -21,6 +22,22 @@ services:
       - ./mediafiles:/opt/recipes/mediafiles
     depends_on:
       - db_recipes
+
+  web_vue:
+    build:
+      context: .
+      target: tandoor_node
+    depends_on:
+      - web_recipes
+    env_file:
+      - ./.env
+    volumes:
+      - .:/opt/recipes:rw,cached
+      - staticfiles:/opt/recipes/staticfiles
+      - nginx_config:/opt/recipes/nginx/conf.d
+      - ./mediafiles:/opt/recipes/mediafiles
+    ports:
+      - "35729:35729"
 
   nginx_recipes:
     image: nginx:mainline-alpine

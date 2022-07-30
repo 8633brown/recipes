@@ -1,4 +1,4 @@
-FROM python:3.10-alpine3.15
+FROM python:3.10-alpine3.15 AS tandoor_python
 
 #Install all dependencies.
 RUN apk add --no-cache postgresql-libs postgresql-client gettext zlib libjpeg libwebp libxml2-dev libxslt-dev py-cryptography openldap
@@ -27,3 +27,17 @@ RUN apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev zlib-de
 COPY . ./
 RUN chmod +x boot.sh
 ENTRYPOINT ["/opt/recipes/boot.sh"]
+
+
+FROM node:lts-alpine AS tandoor_node
+
+WORKDIR /opt/recipes/vue
+
+COPY ./vue/package.json ./vue/yarn.lock ./
+RUN set -eux; \
+    yarn install; \
+    yarn cache clean;
+
+COPY ./vue ./
+
+CMD ["yarn", "watch"]
