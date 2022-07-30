@@ -1,5 +1,7 @@
 #!/bin/sh
-source venv/bin/activate
+if [ ! "${DOCKER}" ]; then
+    source venv/bin/activate
+fi
 
 TANDOOR_PORT="${TANDOOR_PORT:-8080}"
 NGINX_CONF_FILE=/opt/recipes/nginx/conf.d/Recipes.conf
@@ -63,4 +65,8 @@ echo "Done"
 
 chmod -R 755 /opt/recipes/mediafiles
 
-exec gunicorn -b :$TANDOOR_PORT --access-logfile - --error-logfile - --log-level INFO recipes.wsgi
+if [ "${DOCKER}" ]; then
+	exec gunicorn --reload -b :$TANDOOR_PORT --access-logfile - --error-logfile - --log-level INFO recipes.wsgi
+else
+	exec gunicorn -b :$TANDOOR_PORT --access-logfile - --error-logfile - --log-level INFO recipes.wsgi
+fi
